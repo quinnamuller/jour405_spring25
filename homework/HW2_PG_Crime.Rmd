@@ -52,6 +52,12 @@ The categories with the lowest are some of the more serious ones like homicide a
 One theory about crime is that it is more likely to occur in the summer months. Test this theory by creating three new columns using `mutate()` that calculate the percentage change compared to the average for each category of crime for the months of June, July, and August. Call the new columns `june_change`, `july_change`, and `august_change`. Assign the result to a new dataframe called `summer_crime_averages`.
 
 ```{r}
+june_change <- pg_crime_averages %>% mutate((average-Jun)/average*100)
+july_change <- june_change %>% mutate((average-Jul)/average*100)
+august_change <- july_change %>% mutate((average-Aug)/average*100)
+summer_crime_averages <- august_change
+
+#Did I use the right base or is the data for each month suppose to be the base instead fo the average?
 ```
 
 ### Task 7: Describe the Summer Crime Averages

@@ -29,11 +29,12 @@ There are some categories with significantly higher numbers (Accident, Accident 
 
 ### Task 4: Calculating Averages
 
-Calculate the total number of incidents per month for each category using `mutate()`, calling the new column `total_incidents`. Then calculate the average number of incidents per month for each category of crime, calling the new column `average_incidents`. Assign the result to a new dataframe called `pg_crime_averages`.
+Calculate the total number of incidents per month using `mutate()`, calling the new column `total_incidents`. Then calculate the average number of incidents per month for each category of crime, calling the new column `average_incidents`. Assign the result to a new dataframe called `pg_crime_averages`.
 
 ```{r}
-total_incidents <- pg_crime %>% mutate(total = Jan[1:18])
-average_incidents <- pg_crime %>% mutate(average = (total_incidents/12))
+total_incidents <- pg_crime %>% mutate(total = Jan+Feb+Mar+Apr+May+Jun+Jul+Aug+Sep+Oct+Nov+Dec)
+average_incidents <- total_incidents %>% mutate(average = (total/12))
+pg_crime_averages <- average_incidents
 ```
 
 ### Task 5: Describe the Averages
@@ -42,6 +43,9 @@ Examine the new dataframe, `pg_crime_averages`, by clicking on it in the Environ
 
 ANSWER HERE
 
+The top four categories for crime in PG County are car related so I guess I'd be interested in why criminals are so interested in cars. Do people in PG County own cars that are easier to break into? Do they keep more valuables in their car? Do they own more expensive cars? Does this prove that Maryland drivers are actually as bad as people say they are?
+
+The categories with the lowest are some of the more serious ones like homicide and sex offenses. I would ask what the police department is doing to handle these that the numbers are so low, what the original numbers have been over the years to see if there is a downward trend. There are a lot more questions I could ask but these are just the ones I'll put down for now.
 
 ### Task 6: Testing a Theory
 

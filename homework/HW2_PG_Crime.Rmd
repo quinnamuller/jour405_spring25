@@ -9,7 +9,7 @@ In this assignment, we will be working with a dataset reporting the number of cr
 You will need to load the tidyverse library
 
 ```{r}
-
+library(tidyverse)
 ```
 
 Then you'll load the data from the web. The URL for the data is: https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/pg_crime_totals_2024.csv. You will create a dataframe called `pg_crime` that contains the data from this URL.
@@ -17,6 +17,7 @@ Then you'll load the data from the web. The URL for the data is: https://raw.git
 ### Task 2: Load the Data and Describe It
 
 ```{r}
+pg_crime <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/pg_crime_totals_2024.csv")
 ```
 ### Task 3: Describe the Data
 
@@ -24,12 +25,15 @@ You should examine that dataframe carefully by clicking on it in the Environment
 
 ANSWER HERE
 
+There are some categories with significantly higher numbers (Accident, Accident with Impound, Auto Stolen, Theft, and Theft from Auto). A lot of these are car related which may be important to note. From a reporting standpoint, the homicides are typically more important since they're more severe, but so are the high numbers since it may show a trend. There doesn't seem to be too much of a trend of any one category or any significant spikes in the data.
+
 ### Task 4: Calculating Averages
 
 Calculate the total number of incidents per month for each category using `mutate()`, calling the new column `total_incidents`. Then calculate the average number of incidents per month for each category of crime, calling the new column `average_incidents`. Assign the result to a new dataframe called `pg_crime_averages`.
 
 ```{r}
-
+total_incidents <- pg_crime %>% mutate(total = Jan[1:18])
+average_incidents <- pg_crime %>% mutate(average = (total_incidents/12))
 ```
 
 ### Task 5: Describe the Averages

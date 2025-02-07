@@ -43,7 +43,7 @@ Examine the new dataframe, `pg_crime_averages`, by clicking on it in the Environ
 
 ANSWER HERE
 
-The top four categories for crime in PG County are car related so I guess I'd be interested in why criminals are so interested in cars. Do people in PG County own cars that are easier to break into? Do they keep more valuables in their car? Do they own more expensive cars? Does this prove that Maryland drivers are actually as bad as people say they are?
+The top four categories for crime in PG County are car related so I guess I'd be interested in why criminals are so interested in cars. Do people in PG County own cars that are easier to break into? Do they keep more valuables in their car? Do they own more expensive cars? Does the high number of accidents prove that Maryland drivers are actually as bad as people say they are?
 
 The categories with the lowest are some of the more serious ones like homicide and sex offenses. I would ask what the police department is doing to handle these that the numbers are so low, what the original numbers have been over the years to see if there is a downward trend. There are a lot more questions I could ask but these are just the ones I'll put down for now.
 
@@ -52,12 +52,12 @@ The categories with the lowest are some of the more serious ones like homicide a
 One theory about crime is that it is more likely to occur in the summer months. Test this theory by creating three new columns using `mutate()` that calculate the percentage change compared to the average for each category of crime for the months of June, July, and August. Call the new columns `june_change`, `july_change`, and `august_change`. Assign the result to a new dataframe called `summer_crime_averages`.
 
 ```{r}
-june_change <- pg_crime_averages %>% mutate((average-Jun)/average*100)
-july_change <- june_change %>% mutate((average-Jul)/average*100)
-august_change <- july_change %>% mutate((average-Aug)/average*100)
+june_change <- pg_crime_averages %>% mutate((Jun-average)/Jun*100)
+july_change <- june_change %>% mutate((Jul-average)/Jul*100)
+august_change <- july_change %>% mutate((Aug-average)/Aug*100)
 summer_crime_averages <- august_change
 
-#Did I use the right base or is the data for each month suppose to be the base instead fo the average?
+#Had a hard tme figuring out the right formula for this...
 ```
 
 ### Task 7: Describe the Summer Crime Averages
@@ -66,11 +66,17 @@ Look at the `summer_crime_averages` dataframe by clicking on it in the Environme
 
 ANSWER HERE
 
+Other Breaking and Entering crimes were way down, homicides were up. Different types of robberies were also down. Assault shootings were also up 25% in July and August. A lot of the crimes fluctuated a lot throughout the summer with a lot of them actually being below average. The theory is likely not true because a lot of the incidents are below average.
+
 ### Task 8: What's the Story?
 
 Write up a lede and nutgraf of a story focused on the crime data in Prince George's County. It could be from any of the dataframes you've created in this assignment. The lede should be a single sentence that summarizes the most important information in the data. The nutgraf should be a paragraph that provides more context and explains why the data is important.
 
 ANSWER HERE
+
+Prince George's county boasts high numbers of car accidents. 
+
+Maryland has been the butt of many jokes concerning poor drivers, but there may be some truth to it. Out of 26737 crimes committed in 2024, almost 10,000 of them were car accidents. That's more than 1/3 of all crimes in the county. Car accidents pose a potentially fatal risk to both Maryland drivers and pedestrians. The more accidents that occur, the higher that risk is. 
 
 ### Task 9: Save Your Work and Put it on GitHub
 

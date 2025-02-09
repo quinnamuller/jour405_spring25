@@ -57,7 +57,7 @@ july_change <- june_change %>% mutate((Jul-average)/Jul*100)
 august_change <- july_change %>% mutate((Aug-average)/Aug*100)
 summer_crime_averages <- august_change
 
-#Had a hard tme figuring out the right formula for this...
+#Had a hard time figuring out the right formula for this...
 ```
 
 ### Task 7: Describe the Summer Crime Averages

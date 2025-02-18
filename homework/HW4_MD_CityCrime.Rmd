@@ -65,3 +65,13 @@ ANSWER HERE
 ### Task 9: Save Your Work and Put it on GitHub
 
 Save this notebook, then commit it to your local repository. Push the changes to your GitHub repository and submit the URL for this file in ELMS.
+
+### Task 10: HW5
+```{r}
+md_cities_percentiles <- md_cities_rates |> mutate(percentile = ntile(violent_rate_2020, 100))
+md_cities_rates %>% 
+  summarise(iqr_violent_rate2020 = IQR(violent_rate_2020))
+```
+Ten cities are ABOVE the 90th percentile. The IQR is 4.2. This may change the story because the top five cities for violent crime rates are all outliers and there are no lower outliers, they are all higher. These cities may be highlighted as cities in Maryland to watch out for or cities where police departments may need reinforcement. This also provides some hope because it shows that these high crime rates are out of the ordinary for the state and the state can potentially target them.
+
+

@@ -10,7 +10,7 @@ You will need to load the tidyverse library and the janitor library
 
 ```{r}
 library(tidyverse)
-library(jan)
+library(janitor)
 ```
 
 Then you'll load the data from the web. The URL for the data is: https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_cities_crime_2019_2020.csv. You will create a dataframe called `md_cities` that contains the data from this URL.
@@ -18,12 +18,14 @@ Then you'll load the data from the web. The URL for the data is: https://raw.git
 ### Task 2: Load the Data
 
 ```{r}
+md_cities <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_cities_crime_2019_2020.csv")
 ```
 ### Task 3: Calculating Rates
 
 Calculate violent and property crime rates for each city for both years using `mutate()`. You'll create four new columns: `violent_rate_2019`, `property_rate_2019`, `violent_rate_2020`, and `property_rate_2020`. You'll need to figure out the proper unit rate, given that there are varying populations. There's no perfect choice; choose the one that works best for you. Save the results to a new dataframe called `md_cities_rates`.
 
 ```{r}
+md_cities_rates <- md_cities %>% mutate (violent_rate_2019 = (violent2019/pop2019 * 1000), property_rate_2019 = (property2019/pop2019 * 1000), violent_rate_2020 = (violent2020/pop2020 *1000) , property_rate_2020 = (property2020/pop2020 * 1000))
 ```
 
 ### Task 4: Describe the Rates
@@ -32,23 +34,31 @@ Examine the new dataframe, `md_cities_rates`, by clicking on it in the Environme
 
 ANSWER HERE
 
+Cities in more rural counties had less crime overall, and the opposite with urban cities. More populous cities like Baltimore and Ocean City had the highest overall crime rates. For every city, property crime rates were higher than violent crime rates. Baltimore was home to the highest violent crime rates in Maryland in 2019, but was passed by OCMD in 2020, where violent crime rates almost doubled. OCMD also had a very high rate of property crimes in 2019, and an even higher one in 2020. Story: Urban cities in Maryland have significantly more violent crime per 1000 people than rural cities.
 
 ### Task 5: Calculate Percentage Change
 
 Let's add two percentage change columns to your dataframe: one for violent crime rates and one for property crime rates. You'll calculate the percentage change between 2019 and 2020 for each city. Save the results to a new dataframe called `md_cities_change`.
 
 ```{r}
+md_cities_change <- md_cities_rates %>% mutate(violent_change = (violent_rate_2020-violent_rate_2019)/violent_rate_2019 * 100) %>% mutate(property_change = (property_rate_2020-property_rate_2019)/property_rate_2019 * 100)
 ```
 
 ### Task 7: Describe Percentage Changes
 
 Look at the `md_cities_change` dataframe by clicking on it in the Environment tab in RStudio. Write a couple of sentences describing the percentage change results. What's more interesting here, the patterns or the outliers? What's the story in the data?
 
-ANSWER HERE
+There are a lot of small cities like Cecilton and North Chevy Chase that had a 100% drop in violent crime rates, which sounds great but can be misleading, as those cities already had very, very low violent crime rates. A lot of the big jumps in violent crime, like in Edmonston, are also misleading, as the actual rate of crime doesn't increase by much. Baltimore is a good focus point though because crime rates did drop 25% for property crimes and 12.8% for violent crimes.
 
 ### Task 8: Tell the Best Story
 
 Write up a lede and nutgraf of a story with the _best_ story idea you've found in this assignment. The lede should be a single sentence that summarizes the most important information in the data. The nutgraf should be a paragraph that provides more context and explains why the data is important.
+
+*imagine it's 2020*
+
+Violent crime rates in Ocean City are on the rise from last year, passing the notoriously crime-ridden Baltimore.
+
+The popular vacation destination's violent crime rates nearly doubled from last year, landing it the top spot for violent crime in Maryland. Violent crime rates, which includes murder, rape, robbery, and aggravated assault, are, contrarily, down 12.8% in Baltimore. Ocean City also continues to house the highest property crime rate in the state, one that grew by 17% this year.
 
 ANSWER HERE
 

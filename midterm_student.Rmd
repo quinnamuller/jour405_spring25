@@ -139,19 +139,25 @@ car_thefts_rate %>% summarise(median = median(theft_rate))
 car_thefts %>% summarize(total = sum(`2023`))
 
 #Baltimore City, Prince George's, St. Mary's, Baltimore County, Dorchester, Montgomery, Howard, Anne Arundel, Washington, Charles, Cecil and Wicomico counties all have more than the median.
+below_median_thefts <- 23871-7138-8546-105-2427-92-2317-697-1080-262-276-150-106
+above_median_thefts <- 23871-675
+percentage <-23196/23871*100
+#I know this was a really stupid way to do it but I couldn't remember a formula. 97.17% of all car thefts occur in the counties that fall above the median for car theft rates.
 ```
 
 3. Write 2-3 sentences describing what these calculations reveal about the distribution of car thefts in Maryland. What's the lede of a story about your findings? (10 points)
 
 
 ```{r}
-
+#This goes to show that the data is very skewed toward both the left and right. It is likely that there are almost two peaks for the data. The lead would be: Car thefts show an all or nothing pattern in Maryland. Batimore City has more than 100 car thefts per 10000 people while quieter counties like Somerset and Garrett counties having barely more than 2 per 10000 people. 
 ```
 
 ## Part 5: Data Analysis Scenario (20 points)
 
 You receive a tip that local emergency response times have gotten significantly worse over the past year. You obtain monthly data on response times for police, fire and ambulance calls.
+
 #I literally just wrote a story about this...
+
 Write 3-4 sentences (no code!) explaining:
 1. What statistical measures would you calculate to verify this claim? (10 points)
 I would calculate the mean of the response times, and clarify that by category (police, fire and ambulance). I would also compare it with past data and find a percentage change to see if the departments are just overwhelmed. I would also see if I could compare the response times with the actual time it would take to get to the location, though that would be a bit complicated.

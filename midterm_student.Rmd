@@ -1,0 +1,171 @@
+# JOUR405: Statistics for Journalists
+## Midterm Exam - Spring 2025
+
+Name: Quinn Muller
+
+For this exam, you'll analyze several datasets using R and the statistical concepts we've covered in class. Load the tidyverse before beginning, then complete each task. Write your code in the provided blocks and answer the questions in complete sentences. Start by loading the tidyverse and any other libraries you think you might need.
+
+```{r}
+library(tidyverse)
+library(janitor)
+```
+
+## Part 1: Restaurant Health Inspections (15 points)
+
+You want to understand how restaurants in Montgomery County are performing on health inspections. The first dataset contains restaurant health inspection scores for restaurants in Montgomery County. The dataset includes the name of the establishment, the number of points for critical and non-critical areas, the total points, maximum points possible and the compliance score and grade. Load the data from: `https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/montco_inspections.csv` and complete these tasks:
+
+```{r}
+rest_insp <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/montco_inspections.csv")
+```
+
+### Tasks:
+1. Calculate the mean and standard deviation of compliance scores (5 points)
+```{r}
+rest_insp %>%  summarise(mean = mean(compliance_score), sd = sd(compliance_score))
+```
+
+2. Create a histogram of the compliance scores with a vertical line showing the mean (5 points)
+```{r}
+rest_insp %>% 
+  ggplot() +
+  geom_histogram(aes(x = compliance_score), binwidth = 5) +
+  geom_vline(aes(xintercept = mean(compliance_score)), color = "hotpink", linetype = "dashed", size = 1)
+```
+
+3. Write 2-3 sentences interpreting what the standard deviation and histogram tell us about the distribution of compliance scores. What would be newsworthy about this distribution? What's the story here? (5 points).
+
+```{r}
+#The standard deviation tells us that the compliance scores are pretty close to the mean and there isn't too much variation within the data. The histogram contextualizes this even more as it shows that the data is very much skewed to the right towards higher scores. The histogram shows that most restaurants in Montgomery County are performing very well on health inspections, with a very low percentage of restaurants falling below 80%.
+
+```
+
+## Part 2: High School Athletics (25 points)
+
+You are reporting a story about high school sports participation in Maryland and want to see if there are differences between boys and girls. The second dataset shows participation numbers in high school sports across Maryland counties in 2024, broken down by sport and sex. Load the data from: `https://raw.githubusercontent.com/example/md_hs_sports_2024.csv` and complete these tasks:
+
+```{r}
+sports_part <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_hs_participation.csv")
+```
+
+### Tasks:
+1. Calculate the correlation between boys' and girls' participation (5 points)
+```{r}
+sports_part %>% summarize(correlation = cor(boys, girls, method = "pearson"))
+```
+
+2. Add two columns called total and girls_pct using mutate(), with the total adding together boys and girls and girls_pct being the percentage of the total represented by girls participants. (5 points)
+```{r}
+total <- sports_part %>% mutate (total = (boys + girls))
+
+girls_pct <- total %>% mutate (girls_pct = (girls/total*100))
+```
+
+3. Create a scatterplot showing this relationship, adding a line of best fit (5 points)
+```{r}
+girls_pct %>% 
+  ggplot() +
+  geom_point(aes(x = girls, y = total)) +
+  geom_smooth(aes(x = girls, y = total), method = "lm") 
+```
+
+4. In 2-3 sentences, explain what the correlation coefficient and scatterplot reveal about equity in Maryland high school sports participation. How do you interpret the school districts that are below the line vs those that are above? Which school districts are most worth examining further, and why? (10 points)
+
+```{r}
+#The correlation coefficient shows that there is a lot of equity in Maryland high school sports participation. For the most part, there are around as many girls that play sports as boys and there is not too much deviation from that. Schools that are below the line have higher percentages of girls in sports and vice versa.
+
+#I think Baltimore County Public Schools are worth examining since they have a very high percentage of girls making up the total of students who play sports. Somerset County Public Schools would also be a good district to examine but for the opposite reason.
+```
+
+
+## Part 3: Public Transit Ridership (20 points)
+
+You are investigating public transit ridership in the Washington, D.C. area and want to understand the patterns of daily bus and rail ridership. The third dataset contains daily bus and rail ridership totals from WMATA for the past year. Load the data from https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/wmata_daily.csv and do the following:
+
+```{r}
+ridership <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/wmata_daily.csv")
+```
+
+### Tasks:
+1. Calculate the average bus and rail ridership and standard deviation using summarize() (5 points)
+```{r}
+ridership %>%  summarize(mean = mean(total), sd = sd(total))
+```
+
+2. Using the process you used in class, take a random sample daily ridership numbers and calculate the sample means and deviations for bus and rail. The number in the sample is up to you, but explain why you chose what you did. Compare this to the stats you generated in step 1. (5 points)
+```{r}
+sample_100 <- ridership %>% 
+  sample_n(100)
+
+sample_50 <- ridership %>% 
+  sample_n(50)
+
+sample_10 <- ridership %>% 
+  sample_n(10)
+
+sample_100 %>%  summarise(mean = mean(total), sd = sd(total))
+sample_50 %>%  summarise(mean = mean(total), sd = sd(total))
+sample_10 %>%  summarise(mean = mean(total), sd = sd(total))
+```
+
+3. Using group_by() and summarize(), calculate the means for bus and rail ridership for each weekday. Describe the overall pattern of ridership for bus and rail - which days stand out and why? Are there differences between bus and rail in the standard deviation values? (10 points)
+
+```{r}
+weekday_means <- ridership %>% 
+  group_by(weekday) %>% 
+  summarise(mean = mean(total), sd = sd(total)) %>% 
+  arrange(desc(mean))
+
+#Weekends see the least amount of ridership for WMATA bus and rail trips. I also find it interesting that Mondays have the lowest ridership of all of the weekdays. I'm wondering if this has to do with people not wanting their weekends to end. The same goes with Friday, where maybe people want their weekends to start earlier or whether a lot of DC companies may have a four-day work week. The standard deviations is very high for Mondays, which might be explained by the fact that most federal holidays/observances are on Mondays.
+```
+
+## Part 4: Maryland Car Theft Rates (20 points)
+
+Your editor has assigned you a story about car thefts in Maryland and wants you to analyze the data to find out which counties have the highest rates. The fourth dataset contains car theft statistics for Maryland counties in 2023 and population. Load the data from: `https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_car_thefts.csv` and complete the following tasks:
+
+```{r}
+car_thefts <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_car_thefts.csv")
+```
+
+
+### Tasks:
+1. Using mutate, add a column that calculates the rate of car thefts for each county - you need to choose the per capita rate (5 points)
+```{r}
+car_thefts_rate <- car_thefts %>% mutate(theft_rate = (`2023`)/population * 10000)
+```
+
+2. Calculate the median car theft rate and the total number of car thefts statewide. Which counties have rates above the median, and what percentage of all car thefts occur in those counties? (5 points)
+```{r}
+car_thefts_rate %>% summarise(median = median(theft_rate))
+car_thefts %>% summarize(total = sum(`2023`))
+
+#Baltimore City, Prince George's, St. Mary's, Baltimore County, Dorchester, Montgomery, Howard, Anne Arundel, Washington, Charles, Cecil and Wicomico counties all have more than the median.
+```
+
+3. Write 2-3 sentences describing what these calculations reveal about the distribution of car thefts in Maryland. What's the lede of a story about your findings? (10 points)
+
+
+```{r}
+
+```
+
+## Part 5: Data Analysis Scenario (20 points)
+
+You receive a tip that local emergency response times have gotten significantly worse over the past year. You obtain monthly data on response times for police, fire and ambulance calls.
+#I literally just wrote a story about this...
+Write 3-4 sentences (no code!) explaining:
+1. What statistical measures would you calculate to verify this claim? (10 points)
+I would calculate the mean of the response times, and clarify that by category (police, fire and ambulance). I would also compare it with past data and find a percentage change to see if the departments are just overwhelmed. I would also see if I could compare the response times with the actual time it would take to get to the location, though that would be a bit complicated.
+
+2. What visualizations would help readers understand the trends? (5 points)
+I think a histogram could prove very useful in showing the increase in response times over several years. You could also create a two layer histogram to show the expected time to drive to a place vs the actual time it took to respond. You could also make a map of where each call was from and color code it with categories that represent different chunks of response times.
+
+3. What additional context or data would you need to make this a complete story? (5 points)
+I think looking at past data is very important. I would also look at response times for different hospitals or emergency departments. Wait times in Maryland are among the worst in the county so looking at that could also be useful for context. Finally, I would look at where they're spending the most time. PG County hospitals have some of the longest offloading times in Maryland, so that would also bee something to consider.
+
+### Submission Instructions
+- Save your work frequently
+- Make sure all code blocks run without errors
+- Provide clear explanations for your analytical choices
+- Before submitting, clear your environment and run the entire notebook
+
+Good luck!

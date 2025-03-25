@@ -139,6 +139,7 @@ car_thefts_rate %>% summarise(median = median(theft_rate))
 car_thefts %>% summarize(total = sum(`2023`))
 
 #Baltimore City, Prince George's, St. Mary's, Baltimore County, Dorchester, Montgomery, Howard, Anne Arundel, Washington, Charles, Cecil and Wicomico counties all have more than the median.
+
 below_median_thefts <- 23871-7138-8546-105-2427-92-2317-697-1080-262-276-150-106
 above_median_thefts <- 23871-675
 percentage <-23196/23871*100

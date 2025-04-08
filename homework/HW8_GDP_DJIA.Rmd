@@ -48,7 +48,7 @@ gdp_djia %>%
 
 Write a few sentences about the relationship between the DJIA and GDP. Is there a strong correlation between the two variables? What does the scatterplot show?
 
-There is a very high correlation between DJIA and GDP. The 
+There is a very high correlation, 0.95, between DJIA and GDP. The scatterplot shows the data points clustered around line of best fit. As the DJIA increases, so does the GDP, and vice versa.
 
 When you are done, save your work, switch to GitHub Desktop, then add, commit and push your changes to GitHub and submit the URL of the notebook in ELMS.
 

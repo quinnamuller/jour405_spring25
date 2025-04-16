@@ -191,7 +191,7 @@ educ_viz_data <- bind_rows(
     filter(Q21 == 1) |>  # Only "Yes" responses
     mutate(
       Type = "Weighted",
-      percentage = c(93.484409, 70.774705, 85.051096)
+      percentage = (weighted_count / weighted_total * 100)
     ) |>
     select(Type, educ, percentage)
 )

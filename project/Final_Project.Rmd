@@ -103,4 +103,3 @@ uninsured_er_visits <- read_csv("uninsured_er_visits.csv")
 
 #The data covers the rate of uninsured ER visits from 2008 to 2017. It gives the state's baseline which I will definitely reference to see which counties are above or below average. I would also want to filter the data so all of the results are only "All races/ethnicities (aggregated)." With that, I would probably really only look at the county and it's respective value. I would also make sure I'm averaging the values per jurisdiction over the years.
 ```
-

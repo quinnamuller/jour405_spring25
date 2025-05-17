@@ -133,5 +133,6 @@ rural_counties <- read_csv("ruc_2023.csv")
 rural_counties <- filter(rural_counties, State == "MD", Attribute == "RUCC_2023")
 
 #create new sheet with just the maryland data and the RUCC_2023 number...actually so proud of figuring this out and knocking it down from like 10000 obs.
+#How to map: https://r.geocompx.org/adv-map
 ```
 

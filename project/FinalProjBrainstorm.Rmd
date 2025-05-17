@@ -2,6 +2,11 @@
 title: "Final_Project"
 output: html_document
 ---
+By Quinn Muller
+
+Tests to Run
+
+I'm planning on performing Chi-Squared tests on all of the factors potentially correlated with rural areas. I also want to create scatterplots between each factor and the rural-urban code to see if there is a correlation with each factor. I'd also like to create a map of Maryland with different colors for each rural-urban code and then potentially add layers with each of the factors.
 
 ```{r}
 child_maltreatment <- read_csv("child_maltreatment.csv")
@@ -10,7 +15,7 @@ child_maltreatment <- read_csv("child_maltreatment.csv")
 
 #The data covers the child maltreatment rate from 2010 to 2022. It gives the state's baseline which I will definitely reference to see which counties are above or below average. Aside from that I think I may just refer to the value, though I may look to see if there is a trend in the data and refer to the year. You will also definitely catch me referencing a map of this and comparing it with the farms and population data.
 
-#I'm likely going to perform either chi squared tests or ANOVA tests with each of these factors and cross it with the farms data
+#I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
 ```
 
 ```{r}
@@ -20,7 +25,7 @@ crime <- read_csv("crime.csv")
 
 #The data covers both violent and property crime by county from 1975 to 2020. I'd like to look at the crime rates for violent and property crimes individually and compare that with the rural counties. My biggest concern is that it's a lot of data and a lot of it is pretty old, though this may be a good thing to show a long-standing trend. I'm probably only really going to look at the jurisdiction and the crime rate per 100,000 people categories.
 
-#I'm likely going to perform either chi squared tests or ANOVA tests with each of these factors and cross it with the farms data
+#I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
 ```
 
 ```{r}
@@ -30,7 +35,7 @@ domestic_violence <- read_csv("domestic_violence.csv")
 
 #The data covers domestic violence from 2010 to 2020. It gives the state's baseline which I will definitely reference to see which counties are above or below average. So far it seems very prominent in Baltimore City and County. I would like to know exactly what the "value" means--whether it's a rate or the total reported number or if it's some per capita number. I think I may just refer to the value, though I may look to see if there is a trend in the data and refer to the year.
 
-#I'm likely going to perform either chi squared tests or ANOVA tests with each of these factors and cross it with the farms data
+#I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
 ```
 
 ```{r}
@@ -40,7 +45,7 @@ education <- read_csv("education.csv")
 
 #The timing of the data varies but most of it falls from 2017 to 2019. It's organized by county so that will be an important factor. I will probably focus on college enrollment, combining 2-year and 4-year categories, degree attainment, and public school expenditures. I do wish that the data included the number of students per county.
 
-#I'm likely going to perform either chi squared tests or ANOVA tests with each of these factors and cross it with the farms data
+#I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
 ```
 
 ```{r}
@@ -60,7 +65,7 @@ median_household_income <- read_csv("median_household_income.csv")
 
 #The data covers the median household income in Maryland and each of its counties from 2013 to 2023. I probably won't look at trends and will just average the median household income fr each county over those ten years and compare it with the rural counties data.
 
-#I'm likely going to perform either chi squared tests or ANOVA tests with each of these factors and cross it with the farms data
+#I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
 ```
 
 ```{r}
@@ -80,7 +85,7 @@ revenue_sources <- read_csv("revenue_sources.csv")
 
 #This data covers revenue sources per capita per county in 2010. I'm definitely worried that this data is outdated. I definitely want to look at federal and state grants per capita to see if rural counties get less or more money per capita. I would also, of course, refer to the total revenue per capita as well.
 
-#I'm likely going to perform either chi squared tests or ANOVA tests with each of these factors and cross it with the farms data
+#I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
 ```
 
 ```{r}
@@ -90,7 +95,7 @@ drug_overdoses <- read_csv("drug_overdoses.csv")
 
 #this data covers the drug-induced death rate from 2009 to 2021. It gives the state's baseline which I will definitely reference to see which counties are above or below average. I would also want to filter the data so all of the results are only "All races/ ethnicities (aggregated)." With that, I would probably really only look at the county and it's respective value.
 
-#I'm likely going to perform either chi squared tests or ANOVA tests with each of these factors and cross it with the farms data
+#I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
 ```
 
 ```{r}
@@ -100,7 +105,7 @@ diabetes_er_visits <- read_csv("diabetes_er_visits.csv")
 
 #The data covers the rate of ER visits due to diabetes from 2008 to 2017. It gives the state's baseline which I will definitely reference to see which counties are above or below average. I would also want to filter the data so all of the results are only "All races/ethnicities (aggregated)." With that, I would probably really only look at the county and it's respective value. I would also make srue I'm averaging the values per jurisdiction over the years for ALL the datasets like this.
 
-#I'm likely going to perform either chi squared tests or ANOVA tests with each of these factors and cross it with the farms data
+#I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
 ```
 
 ```{r}
@@ -110,7 +115,7 @@ teen_birth_rate <- read_csv("teen_birth_rate.csv")
 
 #The data covers the teen birth rate from 2010 to 2021. It gives the state's baseline which I will definitely reference to see which counties are above or below average. I would also want to filter the data so all of the results are only "All races/ethnicities (aggregated)." With that, I would probably really only look at the county and it's respective value. I would also make sure I'm averaging the values per jurisdiction over the years.
 
-#I'm likely going to perform either chi squared tests or ANOVA tests with each of these factors and cross it with the farms data
+#I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
 ```
 
 ```{r}
@@ -120,7 +125,7 @@ uninsured_er_visits <- read_csv("uninsured_er_visits.csv")
 
 #The data covers the rate of uninsured ER visits from 2008 to 2017. It gives the state's baseline which I will definitely reference to see which counties are above or below average. I would also want to filter the data so all of the results are only "All races/ethnicities (aggregated)." With that, I would probably really only look at the county and it's respective value. I would also make sure I'm averaging the values per jurisdiction over the years.
 
-#I'm likely going to perform either chi squared tests or ANOVA tests with each of these factors and cross it with the farms data
+#I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
 ```
 
 ```{r}

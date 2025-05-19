@@ -56,13 +56,13 @@ child_maltreatment <- filter(child_maltreatment, race_ethnicity == "All races/ e
 ```
 
 ```{r}
-#find the average maltreatment value per county from 2012 to 2017 (got stuck and had some help from chatgpt)
+#find the average maltreatment value per county from 2012 to 2017 (got stuck and had some help from chatgpt: https://chatgpt.com/c/682ace02-396c-8006-a9a4-60f6ad3c5efd)
 child_maltreatment <- child_maltreatment %>%
   group_by(jurisdiction) %>%
   mutate(child_maltreatment = mean(value, na.rm = TRUE)) %>%
   mutate(jurisdiction)
 
-#create new simplified chart with this data (got stuck and had some help from chatgpt)
+#create new simplified chart with this data (got stuck and had some help from chatgpt: https://chatgpt.com/c/682ace02-396c-8006-a9a4-60f6ad3c5efd)
   child_maltreatment <- child_maltreatment %>%
   group_by(jurisdiction) %>%
   summarise(child_maltreatment = mean(value, na.rm = TRUE)) %>%
@@ -121,31 +121,13 @@ crime <- crime %>%
   crime$violent_crime_rate_per_100_000_people <- NULL
   crime$property_crime_rate_per_100_000_people <- NULL
 
-```
-
-```
-
-#delete unaveraged data
-  crime$overall_crime_rate_per_100_000_people <- NULL
-  crime$violent_crime_rate_per_100_000_people <- NULL
-  crime$property_crime_rate_per_100_000_people <- NULL
-```{r}
-#create new simplified chart with this data
-  crime <- crime %>%
-  group_by(jurisdiction) %>%
-  summarise(avgcrimerate_per100000ppl = mean(avgcrimerate_per100000ppl, na.rm = TRUE)) %>%
-  ungroup()
-```
-
-```
-    summarise(avgviolentcrimerate_per100000ppl = mean(avgviolentcrimerate_per100000ppl, na.rm = TRUE)) %>%
-  summarise(avgpropertycrimerate_per100000ppl = mean(avgpropertycrimerate_per100000ppl, na.rm = TRUE)) %>%
-#create new simplified chart with this data
+#THIS IS WHERE IM RUNNING INTO TROUBLE! Organizing the data jsut so I can plug it into the linear regression models is the hardest part of this tbh. I used this same setup for the child maltreatment data adn for some reason it's not working with the crime data--probably bc there are multiple factors
+  
+  #create new simplified chart with this data
   crime <- crime %>%
   group_by(jurisdiction) %>%
   summarise(avgcrimerate_per100000ppl = mean(avgcrimerate_per100000ppl, na.rm = TRUE)) %>%
   summarise(avgviolentcrimerate_per100000ppl = mean(avgviolentcrimerate_per100000ppl, na.rm = TRUE)) %>%
   summarise(avgpropertycrimerate_per100000ppl = mean(avgpropertycrimerate_per100000ppl, na.rm = TRUE)) %>%
   ungroup()
-```
 ```

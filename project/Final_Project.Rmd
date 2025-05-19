@@ -23,26 +23,129 @@ library(spData)
 library(tmap)    # for static and interactive maps
 library(leaflet) # for interactive maps
 library(ggplot2) # tidyverse data visualization package
+library(janitor) # to clean up titles and stuff
 ```
 
 ```{r}
 #Load all factor data
-child_maltreatment <- read_csv("child_maltreatment.csv")
-crime <- read_csv("crime.csv")
-diabetes_er_visits <- read_csv("diabetes_er_visits.csv")
-domestic_violence <- read_csv("domestic_violence.csv")
-drug_overdoses <- read_csv("drug_overdoses.csv")
-education <- read_csv("education.csv")
-median_household_income <- read_csv("median_household_income.csv")
-teen_birth_rate <- read_csv("teen_birth_rate.csv")
-revenue_sources <- read_csv("revenue_sources.csv")
-uninsured_er_visits <- read_csv("uninsured_er_visits.csv")
-
+child_maltreatment <- read_csv("child_maltreatment.csv") %>% clean_names()
+crime <- read_csv("crime.csv") %>% clean_names()
+diabetes_er_visits <- read_csv("diabetes_er_visits.csv") %>% clean_names()
+domestic_violence <- read_csv("domestic_violence.csv") %>% clean_names()
+drug_overdoses <- read_csv("drug_overdoses.csv") %>% clean_names()
+education <- read_csv("education.csv") %>% clean_names()
+median_household_income <- read_csv("median_household_income.csv") %>% clean_names()
+teen_birth_rate <- read_csv("teen_birth_rate.csv") %>% clean_names()
+revenue_sources <- read_csv("revenue_sources.csv") %>% clean_names()
+uninsured_er_visits <- read_csv("uninsured_er_visits.csv") %>% clean_names()
+```
+```{r}
 #Load all data that will show which counties in MD are rural. Rural areas are defined as places with fewer than 5,000 people and 2,000 housing units, according to the USDA.
 #https://www.ers.usda.gov/topics/rural-economy-population/rural-classifications
 
-rural_counties <- read_csv("ruc_2023.csv")
+rural_counties <- read_csv("ruc_2023.csv") %>% clean_names()
 #Filtered data for the entire country into a dataset with only Maryland's RUCC2023 data
-rural_counties <- filter(rural_counties, State == "MD", Attribute == "RUCC_2023")
+rural_counties <- filter(rural_counties, state == "MD", attribute == "RUCC_2023")
 #Going to make a desperate attempt to visualize this data into a map
+```
+THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND CHILD MALTREATMENT
+
+```{r}
+#filter child maltreatment so it only includes data encompassing all races
+child_maltreatment <- filter(child_maltreatment, race_ethnicity == "All races/ ethnicities (aggregated)")
+```
+
+```{r}
+#find the average maltreatment value per county from 2012 to 2017 (got stuck and had some help from chatgpt)
+child_maltreatment <- child_maltreatment %>%
+  group_by(jurisdiction) %>%
+  mutate(child_maltreatment = mean(value, na.rm = TRUE)) %>%
+  mutate(jurisdiction)
+
+#create new simplified chart with this data (got stuck and had some help from chatgpt)
+  child_maltreatment <- child_maltreatment %>%
+  group_by(jurisdiction) %>%
+  summarise(child_maltreatment = mean(value, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+```{r}
+#create new simplified chart with rural categorized and child maltreatment data
+  rural_counties$fips <- NULL
+  rural_counties$state <- NULL
+  rural_counties$attribute <- NULL
+  child_maltreatment <- child_maltreatment[-21, ]
+```
+
+```{r}
+#create joint chart
+  CMxRURAL <- bind_cols(child_maltreatment, rural_counties)
+  CMxRURAL$jurisdiction <- NULL
+```
+
+```{r}
+#scatterplot for child maltreatment jurisdiction avg and rural classification
+  CMxRURAL |>
+  ggplot(aes(x = `value`, y = `child_maltreatment`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "hotpink") +
+  labs(x = "Rural Classification", y = "Average Child Maltreatment Rate", title = "Scatterplot of Average Child Maltreatment Rate and Rural Classification")
+```
+```{r}
+#linear regression model for child maltreatment and rural classification
+model <- lm(`value` ~ `child_maltreatment`, data = CMxRURAL)
+
+summary(model)
+```
+We can conclude there is no significant relationship between rural classification and average child maltreatment since the p-value is above 0.05 and the child maltreatment coefficient is very close to 0. The adjusted R-squared value is also very small which doubles down on this idea. Child maltreatment is more varied in urban counties and is relatively lower in the most rural counties, but there isn't an outright relationship between the variables.
+
+
+
+THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND CRIME
+
+```{r}
+#simplify crime chart to include general data
+  crime <- crime[c("jurisdiction", "overall_crime_rate_per_100_000_people", "violent_crime_rate_per_100_000_people", "property_crime_rate_per_100_000_people")]
+```
+
+```{r}
+#find the average crime values per county
+crime <- crime %>%
+  group_by(jurisdiction) %>%
+  mutate(avgcrimerate_per100000ppl = mean(overall_crime_rate_per_100_000_people, na.rm = TRUE)) %>%
+  mutate(avgviolentcrimerate_per100000ppl = mean(violent_crime_rate_per_100_000_people, na.rm = TRUE)) %>%
+  mutate(avgpropertycrimerate_per100000ppl = mean(property_crime_rate_per_100_000_people, na.rm = TRUE))
+
+#delete unaveraged data
+  crime$overall_crime_rate_per_100_000_people <- NULL
+  crime$violent_crime_rate_per_100_000_people <- NULL
+  crime$property_crime_rate_per_100_000_people <- NULL
+
+```
+
+```
+
+#delete unaveraged data
+  crime$overall_crime_rate_per_100_000_people <- NULL
+  crime$violent_crime_rate_per_100_000_people <- NULL
+  crime$property_crime_rate_per_100_000_people <- NULL
+```{r}
+#create new simplified chart with this data
+  crime <- crime %>%
+  group_by(jurisdiction) %>%
+  summarise(avgcrimerate_per100000ppl = mean(avgcrimerate_per100000ppl, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+```
+    summarise(avgviolentcrimerate_per100000ppl = mean(avgviolentcrimerate_per100000ppl, na.rm = TRUE)) %>%
+  summarise(avgpropertycrimerate_per100000ppl = mean(avgpropertycrimerate_per100000ppl, na.rm = TRUE)) %>%
+#create new simplified chart with this data
+  crime <- crime %>%
+  group_by(jurisdiction) %>%
+  summarise(avgcrimerate_per100000ppl = mean(avgcrimerate_per100000ppl, na.rm = TRUE)) %>%
+  summarise(avgviolentcrimerate_per100000ppl = mean(avgviolentcrimerate_per100000ppl, na.rm = TRUE)) %>%
+  summarise(avgpropertycrimerate_per100000ppl = mean(avgpropertycrimerate_per100000ppl, na.rm = TRUE)) %>%
+  ungroup()
+```
 ```

@@ -37,7 +37,6 @@ education <- read_csv("education.csv") %>% clean_names()
 median_household_income <- read_csv("median_household_income.csv") %>% clean_names()
 teen_birth_rate <- read_csv("teen_birth_rate.csv") %>% clean_names()
 revenue_sources <- read_csv("revenue_sources.csv") %>% clean_names()
-uninsured_er_visits <- read_csv("uninsured_er_visits.csv") %>% clean_names()
 ```
 ```{r}
 #Load all data that will show which counties in MD are rural. Rural areas are defined as places with fewer than 5,000 people and 2,000 housing units, according to the USDA.
@@ -46,7 +45,7 @@ uninsured_er_visits <- read_csv("uninsured_er_visits.csv") %>% clean_names()
 rural_counties <- read_csv("ruc_2023.csv") %>% clean_names()
 #Filtered data for the entire country into a dataset with only Maryland's RUCC2023 data
 rural_counties <- filter(rural_counties, state == "MD", attribute == "RUCC_2023")
-#Going to make a desperate attempt to visualize this data into a map
+#Going to make a desperate attempt to visualize this data into a map later
 ```
 THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND CHILD MALTREATMENT
 
@@ -56,21 +55,16 @@ child_maltreatment <- filter(child_maltreatment, race_ethnicity == "All races/ e
 ```
 
 ```{r}
-#find the average maltreatment value per county from 2012 to 2017 (got stuck and had some help from chatgpt: https://chatgpt.com/c/682ace02-396c-8006-a9a4-60f6ad3c5efd)
-child_maltreatment <- child_maltreatment %>%
-  group_by(jurisdiction) %>%
-  mutate(child_maltreatment = mean(value, na.rm = TRUE)) %>%
-  mutate(jurisdiction)
+#find the average maltreatment value per county from 2012 to 2017 and create simplified dataframe (got stuck and had some help from chatgpt: https://chatgpt.com/c/682ace02-396c-8006-a9a4-60f6ad3c5efd)
 
-#create new simplified chart with this data (got stuck and had some help from chatgpt: https://chatgpt.com/c/682ace02-396c-8006-a9a4-60f6ad3c5efd)
-  child_maltreatment <- child_maltreatment %>%
+child_maltreatment <- child_maltreatment %>%
   group_by(jurisdiction) %>%
   summarise(child_maltreatment = mean(value, na.rm = TRUE)) %>%
   ungroup()
 ```
 
 ```{r}
-#create new simplified chart with rural categorized and child maltreatment data
+#simplify dataframe with rural categorized and child maltreatment data
   rural_counties$fips <- NULL
   rural_counties$state <- NULL
   rural_counties$attribute <- NULL
@@ -79,25 +73,29 @@ child_maltreatment <- child_maltreatment %>%
 
 ```{r}
 #create joint chart
-  CMxRURAL <- bind_cols(child_maltreatment, rural_counties)
-  CMxRURAL$jurisdiction <- NULL
+  childmaltreatment_rural <- bind_cols(child_maltreatment, rural_counties)
+  childmaltreatment_rural$jurisdiction <- NULL
 ```
 
 ```{r}
-#scatterplot for child maltreatment jurisdiction avg and rural classification
-  CMxRURAL |>
-  ggplot(aes(x = `value`, y = `child_maltreatment`)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, color = "hotpink") +
-  labs(x = "Rural Classification", y = "Average Child Maltreatment Rate", title = "Scatterplot of Average Child Maltreatment Rate and Rural Classification")
+# Create boxplot for child maltreatment jurisdiction avg and rural classification
+ggplot(childmaltreatment_rural, aes(x = value, y = child_maltreatment, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Child Maltreatment Rate by Rural Classification",
+    x = "Rural Classification",
+    y = "Child Maltreatment Rate"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
 ```
 ```{r}
 #linear regression model for child maltreatment and rural classification
-model <- lm(`value` ~ `child_maltreatment`, data = CMxRURAL)
+model <- lm(`value` ~ `child_maltreatment`, data = childmaltreatment_rural)
 
 summary(model)
 ```
-We can conclude there is no significant relationship between rural classification and average child maltreatment since the p-value is above 0.05 and the child maltreatment coefficient is very close to 0. The adjusted R-squared value is also very small which doubles down on this idea. Child maltreatment is more varied in urban counties and is relatively lower in the most rural counties, but there isn't an outright relationship between the variables.
+We can conclude there is no significant relationship between rural classification and average child maltreatment since the p-value is above 0.05 and the child maltreatment coefficient is very close to 0. The adjusted R-squared value is also very small which doubles down on this idea. Child maltreatment is more varied in urban counties and is relatively lower in the most rural counties, but there isn't an outright relationship between the variables. In Maryland, however, the most rural counties (6-9 RUC) have the lowest child maltreatment rates.
 
 
 
@@ -109,25 +107,244 @@ THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO T
 ```
 
 ```{r}
-#find the average crime values per county
+#find the average crime values per county and update dataframe w it
 crime <- crime %>%
   group_by(jurisdiction) %>%
-  mutate(avgcrimerate_per100000ppl = mean(overall_crime_rate_per_100_000_people, na.rm = TRUE)) %>%
-  mutate(avgviolentcrimerate_per100000ppl = mean(violent_crime_rate_per_100_000_people, na.rm = TRUE)) %>%
-  mutate(avgpropertycrimerate_per100000ppl = mean(property_crime_rate_per_100_000_people, na.rm = TRUE))
+  summarize(avgcrimerate_per100000ppl = mean(overall_crime_rate_per_100_000_people, na.rm = TRUE), avgviolentcrimerate_per100000ppl = mean(violent_crime_rate_per_100_000_people, na.rm = TRUE), avgpropertycrimerate_per100000ppl = mean(property_crime_rate_per_100_000_people, na.rm = TRUE)) |> 
+  rename(county_name = jurisdiction) |> 
+  mutate(county_name = str_to_upper(county_name))
 
-#delete unaveraged data
-  crime$overall_crime_rate_per_100_000_people <- NULL
-  crime$violent_crime_rate_per_100_000_people <- NULL
-  crime$property_crime_rate_per_100_000_people <- NULL
+# make county_name all upper case to join to crime
+rural_counties <- rural_counties |> mutate(county_name = str_to_upper(county_name))
 
-#THIS IS WHERE IM RUNNING INTO TROUBLE! Organizing the data jsut so I can plug it into the linear regression models is the hardest part of this tbh. I used this same setup for the child maltreatment data adn for some reason it's not working with the crime data--probably bc there are multiple factors
-  
-  #create new simplified chart with this data
-  crime <- crime %>%
-  group_by(jurisdiction) %>%
-  summarise(avgcrimerate_per100000ppl = mean(avgcrimerate_per100000ppl, na.rm = TRUE)) %>%
-  summarise(avgviolentcrimerate_per100000ppl = mean(avgviolentcrimerate_per100000ppl, na.rm = TRUE)) %>%
-  summarise(avgpropertycrimerate_per100000ppl = mean(avgpropertycrimerate_per100000ppl, na.rm = TRUE)) %>%
-  ungroup()
+# join crime to rural
+crime_rural <- crime |> inner_join(rural_counties)
 ```
+
+```{r}
+# Create boxplots for average crime rates and rural classification
+
+#overall crime rate
+ggplot(crime_rural, aes(x = value, y = avgcrimerate_per100000ppl, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Average Crime Rate per 100,000 People by Rural Classification",
+    x = "Rural Classification",
+    y = "Average Crime Rate per 100,000 People"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+
+#violent crime rate
+ggplot(crime_rural, aes(x = value, y = avgviolentcrimerate_per100000ppl, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Average Violent Crime Rate per 100,000 People by Rural Classification",
+    x = "Rural Classification",
+    y = "Average Violent Crime Rate per 100,000 People"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+
+#property crime rate
+ggplot(crime_rural, aes(x = value, y = avgpropertycrimerate_per100000ppl, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Average Property Crime Rate per 100,000 People by Rural Classification",
+    x = "Rural Classification",
+    y = "Average Property Crime Rate per 100,000 People"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+```
+
+I'm beginning to notice this pattern with counties that have a level 4 rural classification. "The Census Bureau defines rural as any population, housing, or territory not in an urban area," according to the USDA. Going back to the definitions of each level, 4 is the first "non-metro area," and is defined as Urban population of 20,000 or more, adjacent to a metro area. 4s are Allegany and Worcester counties.
+
+```{r}
+#linear regression model for average crime rate and rural classification
+model <- lm(`value` ~ `avgcrimerate_per100000ppl`, data = crime_rural)
+
+summary(model)
+```
+Very small coefficient, high p-value and low r-squared all go to show that there is no significant relationship between overall crime rates and rural classification.
+
+```{r}
+#linear regression model for average violent crime rate and rural classification
+model <- lm(`value` ~ `avgviolentcrimerate_per100000ppl`, data = crime_rural)
+
+summary(model)
+```
+Very small coefficient, high p-value and low r-squared all go to show that there is no significant relationship between average violent crime rates and rural classification.
+
+```{r}
+#linear regression model for average property crime rate and rural classification
+model <- lm(`value` ~ `avgpropertycrimerate_per100000ppl`, data = crime_rural)
+
+summary(model)
+```
+Very small coefficient, high p-value and low r-squared all go to show that there is no significant relationship between average property crime rates and rural classification.
+
+
+
+THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND DIABETES ER VISITS
+
+```{r}
+#filter diabetes so it only includes data encompassing all races
+diabetes_er_visits <- filter(diabetes_er_visits, race_ethnicity == "All races/ ethnicities (aggregated)")
+
+#null unnecessary columns
+diabetes_er_visits$race_ethnicity <- NULL
+diabetes_er_visits$measure <- NULL
+diabetes_er_visits$year <- NULL
+```
+
+```{r}
+#find the average diabetes er visit value per county and simplify chart
+diabetes_er_visits <- diabetes_er_visits %>%
+  group_by(jurisdiction) %>%
+  summarise(diabetes_er_visits = mean(value, na.rm = TRUE)) %>%
+  ungroup()
+
+#remove state data
+    diabetes_er_visits <- diabetes_er_visits[-21, ]
+```
+
+```{r}
+#combining the two charts
+# join diabetes ER visits to rural
+  diabetes_rural <- bind_cols(diabetes_er_visits, rural_counties)
+  diabetes_rural$jurisdiction <- NULL
+```
+
+```{r}
+# Create boxplot for average diabetes ER visit rate and rural classification
+
+ggplot(diabetes_rural, aes(x = value, y = diabetes_er_visits, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Average ER Visit Rate for Diabetes by Rural Classification",
+    x = "Rural Classification",
+    y = "Average ER Visit Rate for Diabetes"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+```
+
+Again, this spike in the suburbs keeps happening and I'm not sure why, the story might be here.
+
+```{r}
+#linear regression model for average diabetes ER visits rate and rural classification
+model <- lm(`value` ~ `diabetes_er_visits`, data = diabetes_rural)
+
+summary(model)
+```
+Very small coefficient, high p-value and low r-squared all go to show that there is no significant relationship between diabetes ER visits and rural classification.
+
+
+
+THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND DOMESTIC VIOLENCE
+
+```{r}
+#filter domestic violence so it only includes data encompassing all races
+domestic_violence <- filter(domestic_violence, race_ethnicity == "All races/ ethnicities (aggregated)")
+
+#null unnecessary columns
+domestic_violence$race_ethnicity <- NULL
+domestic_violence$measure <- NULL
+domestic_violence$year <- NULL
+```
+
+```{r}
+#find the average domestic violence value per county and simplify chart
+domestic_violence <- domestic_violence %>%
+  group_by(jurisdiction) %>%
+  summarise(domestic_violence = mean(value, na.rm = TRUE)) %>%
+  ungroup()
+
+#remove state data
+    domestic_violence <- domestic_violence[-21, ]
+```
+
+```{r}
+#combining the two charts
+# join domestic violence to rural
+  domestic_rural <- bind_cols(domestic_violence, rural_counties)
+  domestic_rural$jurisdiction <- NULL
+```
+
+```{r}
+# Create boxplot for domestic violence rate and rural classification
+
+ggplot(domestic_rural, aes(x = value, y = domestic_violence, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Average Domestic Violence Rate by Rural Classification",
+    x = "Rural Classification",
+    y = "Average Domestic Violence Rate"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+```
+
+The pattern of the data is so consistent it's actually weird. There isn't a specific linear correlation though there seems to be a pattern. Like a sin graph. 
+
+```{r}
+#linear regression model for average domestic violence rate and rural classification
+model <- lm(`value` ~ `domestic_violence`, data = domestic_rural)
+
+summary(model)
+```
+Very small coefficient, high p-value and low r-squared all go to show that there is no significant relationship between domestic violence and rural classification.
+
+
+
+THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND EDUCATION
+
+```{r}
+#filter education so it only includes general data
+education <- filter(education, race_ethnicity == "All races/ ethnicities (aggregated)")
+
+#null unnecessary columns
+drug_overdoses$race_ethnicity <- NULL
+drug_overdoses$measure <- NULL
+drug_overdoses$year <- NULL
+```
+
+```{r}
+#find the average drug overdoses value per county and simplify dataframe 
+drug_overdoses <- drug_overdoses %>%
+  group_by(jurisdiction) %>%
+  summarise(drug_overdoses = mean(value, na.rm = TRUE)) %>%
+  ungroup()
+
+#remove state data
+  drug_overdoses <- drug_overdoses[-21, ]
+```
+
+```{r}
+#join drug overdoses to rural
+  drug_overdoses_rural <- bind_cols(drug_overdoses, rural_counties)
+  drug_overdoses_rural$jurisdiction <- NULL
+```
+
+```{r}
+# Create boxplot for avg drug overdose rate and rural classification
+
+ggplot(drug_overdoses_rural, aes(x = value, y = drug_overdoses, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Average Drug Overdose Rate by Rural Classification",
+    x = "Rural Classification",
+    y = "Average Drug Overdose Rate"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+```
+
+```{r}
+#linear regression model for average property crime rate and rural classification
+model <- lm(`value` ~ `diabetes_er_visits`, data = diabetes_rural)
+
+summary(model)
+```
+Very small coefficient, high p-value and low r-squared all go to show that there is no significant relationship between domestic violence and rural classification.

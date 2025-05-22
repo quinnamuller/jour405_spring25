@@ -13,16 +13,30 @@ library(janitor)
 ```
 
 ```{r}
-#Load all factor data
-child_maltreatment <- read_csv("child_maltreatment.csv") %>% clean_names()
-crime <- read_csv("crime.csv") %>% clean_names()
-diabetes_er_visits <- read_csv("diabetes_er_visits.csv") %>% clean_names()
-domestic_violence <- read_csv("domestic_violence.csv") %>% clean_names()
-drug_overdoses <- read_csv("drug_overdoses.csv") %>% clean_names()
-education <- read_csv("education.csv") %>% clean_names()
-median_household_income <- read_csv("median_household_income.csv") %>% clean_names()
-teen_birth_rate <- read_csv("teen_birth_rate.csv") %>% clean_names()
-revenue_sources <- read_csv("revenue_sources.csv") %>% clean_names()
+#Load all factor data from google sheets urls that were published ot the web
+cm_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSaVW1HFwAukl2v_ptJWrHpbRLDOs4gpXJ4hW0v47ZUbslZ95Gdq2qF9fkKOIQlPM7k0vpnC_Jg4pkE/pub?gid=2034611530&single=true&output=csv"
+child_maltreatment <- read_csv(cm_url) %>% clean_names()
+
+crime_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_OyK5E2AAsWYPleOTqdQKCxZMDq8lmreIOt_ZSdLKM_IMnLgmwz7241XcrNO3NKpm1905lmnNNbDj/pub?gid=717878644&single=true&output=csv"
+crime <- read_csv(crime_url) %>% clean_names()
+
+diabetes_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vR1A8q98GEz8HN-gWeCgep02mcRyJDRpr-8t6T7_A8B6xjdQVho34J6lJdnIPrs4bk5EFv58a4bS3G1/pub?gid=1371105602&single=true&output=csv"
+diabetes_er_visits <- read_csv(diabetes_url) %>% clean_names()
+
+dv_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vRdGLUUW7-YLDCEQi6qqVc12lZls8-2404tYvyCoCy2RDpp17n9mbr9l_ChWTBFzdxpKjk8Nx6MjCf4/pub?gid=1463926130&single=true&output=csv"
+domestic_violence <- read_csv(dv_url) %>% clean_names()
+
+education_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vT6stEtq0GANGVB2IvqJRLCfqDFt79gOskLh7gIMx8VT-PWkbEWLHqs85RtK6PP2v5tH5Q5sJGPS771/pub?gid=242341202&single=true&output=csv"
+education <- read_csv(education_url) %>% clean_names()
+
+mhi_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxJf0sDzL_VsTcIYg2l4xQiDdH9Z-yiLMyWIOscGkD7jTY7K8e15nJDPQG9GHN7jgUenIZzZ88PQuO/pub?gid=2044629997&single=true&output=csv"
+median_household_income <- read_csv(mhi_url) %>% clean_names()
+
+tbr_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vQnR-WANQIJhxfiuWjen3XT0S8T7qmfUJ57quTT5d5jNMyarO2hWIQfA414xbnsNbDBBzpnWEieCkgL/pub?gid=1324188736&single=true&output=csv"
+teen_birth_rate <- read_csv(tbr_url) %>% clean_names()
+
+rs_url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vQNVySp7KBoQUq9QiMV2WKBsW3sJ3pVDeh7WzKGX3zgErUVKGOMvRSEXZIdt0Ebkg-x0ASfGUOtnQrm/pub?gid=1685096153&single=true&output=csv"
+revenue_sources <- read_csv(rs_url) %>% clean_names()
 ```
 ```{r}
 #Load all data that will show which counties in MD are rural. Rural areas are defined as non-metro places for this analysis. Fix the names b/c they're formatted weird.

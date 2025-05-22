@@ -2,28 +2,14 @@
 title: "Final_Project"
 output: html_document
 ---
-```{r}
-#Install packages for map making
-install.packages("sf")
-install.packages("terra")
-install.packages("spData")
-install.packages("spDataLarge")
-install.packages("tmap", repos = c("https://r-tmap.r-universe.dev",
-                                   "https://cloud.r-project.org"))
-```
 
 ```{r}
+#load packages!
 library(tidyverse)
 library(readr)
-#Load packages for map making!
-library(sf)
-library(terra)
 library(dplyr)
-library(spData)
-library(tmap)    # for static and interactive maps
-library(leaflet) # for interactive maps
-library(ggplot2) # tidyverse data visualization package
-library(janitor) # to clean up titles and stuff
+library(ggplot2) 
+library(janitor) 
 ```
 
 ```{r}
@@ -39,23 +25,23 @@ teen_birth_rate <- read_csv("teen_birth_rate.csv") %>% clean_names()
 revenue_sources <- read_csv("revenue_sources.csv") %>% clean_names()
 ```
 ```{r}
-#Load all data that will show which counties in MD are rural. Rural areas are defined as places with fewer than 5,000 people and 2,000 housing units, according to the USDA.
-#https://www.ers.usda.gov/topics/rural-economy-population/rural-classifications
+#Load all data that will show which counties in MD are rural. Rural areas are defined as non-metro places for this analysis. Fix the names b/c they're formatted weird.
 
 rural_counties <- read_csv("ruc_2023.csv") %>% clean_names()
+
 #Filtered data for the entire country into a dataset with only Maryland's RUCC2023 data
 rural_counties <- filter(rural_counties, state == "MD", attribute == "RUCC_2023")
-#Going to make a desperate attempt to visualize this data into a map later
 ```
 THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND CHILD MALTREATMENT
 
 ```{r}
-#filter child maltreatment so it only includes data encompassing all races
+#filter child maltreatment dataset so it only includes aggregate data for all races
 child_maltreatment <- filter(child_maltreatment, race_ethnicity == "All races/ ethnicities (aggregated)")
 ```
 
 ```{r}
-#find the average maltreatment value per county from 2012 to 2017 and create simplified dataframe (got stuck and had some help from chatgpt: https://chatgpt.com/c/682ace02-396c-8006-a9a4-60f6ad3c5efd)
+#find the average child maltreatment value per county from 2012 to 2017 and create a simplified dataframe with the means. group them by jurisdiction so there is one value per county 
+#(got stuck and had some help from chatgpt: https://chatgpt.com/c/682ace02-396c-8006-a9a4-60f6ad3c5efd)
 
 child_maltreatment <- child_maltreatment %>%
   group_by(jurisdiction) %>%
@@ -64,15 +50,17 @@ child_maltreatment <- child_maltreatment %>%
 ```
 
 ```{r}
-#simplify dataframe with rural categorized and child maltreatment data
+#simplify dataframe with rural categorized and child maltreatment data by eliminating unneccesary columns. this will be used to compare with every other factor 
   rural_counties$fips <- NULL
   rural_counties$state <- NULL
   rural_counties$attribute <- NULL
+  
+#remove state values, only want county values
   child_maltreatment <- child_maltreatment[-21, ]
 ```
 
 ```{r}
-#create joint chart
+#create joint chart with child maltreatment and rural counties data, get rid of second county column to simplify
   childmaltreatment_rural <- bind_cols(child_maltreatment, rural_counties)
   childmaltreatment_rural$jurisdiction <- NULL
 ```
@@ -102,22 +90,23 @@ We can conclude there is no significant relationship between rural classificatio
 THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND CRIME
 
 ```{r}
-#simplify crime chart to include general data
+#simplify crime chart to only include general data. we only want the rate per capita for overall crime, violent crime, and propoerty crime to keep things less hectic
   crime <- crime[c("jurisdiction", "overall_crime_rate_per_100_000_people", "violent_crime_rate_per_100_000_people", "property_crime_rate_per_100_000_people")]
 ```
 
 ```{r}
-#find the average crime values per county and update dataframe w it
+#find the average crime values per county and create a simplified dataframe with the means. group them by jurisdiction so there is one value per county.
 crime <- crime %>%
   group_by(jurisdiction) %>%
   summarize(avgcrimerate_per100000ppl = mean(overall_crime_rate_per_100_000_people, na.rm = TRUE), avgviolentcrimerate_per100000ppl = mean(violent_crime_rate_per_100_000_people, na.rm = TRUE), avgpropertycrimerate_per100000ppl = mean(property_crime_rate_per_100_000_people, na.rm = TRUE)) |> 
   rename(county_name = jurisdiction) |> 
   mutate(county_name = str_to_upper(county_name))
 
-# make county_name all upper case to join to crime
+#make county_name all upper case to join to crime
+#ended up modifying this technique completely for all the other sections b/c it got too complicated--some data frames just would write "Allegany" instead of "Allegany County" so this didn't work
 rural_counties <- rural_counties |> mutate(county_name = str_to_upper(county_name))
 
-# join crime to rural
+# combine crime and rural counties datasets
 crime_rural <- crime |> inner_join(rural_counties)
 ```
 
@@ -189,29 +178,29 @@ Very small coefficient, high p-value and low r-squared all go to show that there
 THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND DIABETES ER VISITS
 
 ```{r}
-#filter diabetes so it only includes data encompassing all races
+#filter diabetes so it only includes aggregate data encompassing all races
 diabetes_er_visits <- filter(diabetes_er_visits, race_ethnicity == "All races/ ethnicities (aggregated)")
 
-#null unnecessary columns
+#null unnecessary columns to simplify the dataset (literally half of my code is just trying to simplify the data)
 diabetes_er_visits$race_ethnicity <- NULL
 diabetes_er_visits$measure <- NULL
 diabetes_er_visits$year <- NULL
 ```
 
 ```{r}
-#find the average diabetes er visit value per county and simplify chart
+#find the average diabetes ER visits per county and create a simplified dataframe with the means. group them by jurisdiction so there is one value per county.
+
 diabetes_er_visits <- diabetes_er_visits %>%
   group_by(jurisdiction) %>%
   summarise(diabetes_er_visits = mean(value, na.rm = TRUE)) %>%
   ungroup()
 
-#remove state data
-    diabetes_er_visits <- diabetes_er_visits[-21, ]
+#remove state data to simplify
+diabetes_er_visits <- diabetes_er_visits[-21, ]
 ```
 
 ```{r}
-#combining the two charts
-# join diabetes ER visits to rural
+#combining the diabetes ER visits dataframe to rural counties dataframe
   diabetes_rural <- bind_cols(diabetes_er_visits, rural_counties)
   diabetes_rural$jurisdiction <- NULL
 ```
@@ -245,29 +234,29 @@ Very small coefficient, high p-value and low r-squared all go to show that there
 THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND DOMESTIC VIOLENCE
 
 ```{r}
-#filter domestic violence so it only includes data encompassing all races
+#filter domestic violence so it only includes aggregate data encompassing all races
 domestic_violence <- filter(domestic_violence, race_ethnicity == "All races/ ethnicities (aggregated)")
 
-#null unnecessary columns
+#remove unnecessary columns
 domestic_violence$race_ethnicity <- NULL
 domestic_violence$measure <- NULL
 domestic_violence$year <- NULL
 ```
 
 ```{r}
-#find the average domestic violence value per county and simplify chart
+#find the average domestic violence values per county and create a simplified dataframe with the means. group them by jurisdiction so there is one value per county.
+
 domestic_violence <- domestic_violence %>%
   group_by(jurisdiction) %>%
   summarise(domestic_violence = mean(value, na.rm = TRUE)) %>%
   ungroup()
 
-#remove state data
+#remove state data!
     domestic_violence <- domestic_violence[-21, ]
 ```
 
 ```{r}
-#combining the two charts
-# join domestic violence to rural
+#combining the domestic violence dataframe to the rural counties dataframe and delete the second county column
   domestic_rural <- bind_cols(domestic_violence, rural_counties)
   domestic_rural$jurisdiction <- NULL
 ```
@@ -301,50 +290,293 @@ Very small coefficient, high p-value and low r-squared all go to show that there
 THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND EDUCATION
 
 ```{r}
-#filter education so it only includes general data
-education <- filter(education, race_ethnicity == "All races/ ethnicities (aggregated)")
+#remove unnecessary data bc there are a lot of rows here that are not actual data that we need
+education <- education[-c(25, 26, 27, 28), ]
 
-#null unnecessary columns
-drug_overdoses$race_ethnicity <- NULL
-drug_overdoses$measure <- NULL
-drug_overdoses$year <- NULL
+#convert data to numeric format 
+#I used chat gpt to figure out what was wrong bc things weren't sorting correctly and I figured there was an issue, and there was! https://chatgpt.com/c/682ed7d5-ea88-8006-8db2-a55474250b31
+
+education$annual_number_of_public_high_school_graduates <- as.numeric(education$annual_number_of_public_high_school_graduates)
+education$public_school_student_teacher_ratio <- as.numeric(education$public_school_student_teacher_ratio)
+education$public_school_expenditures_per_pupil_dollars <- as.numeric(education$public_school_expenditures_per_pupil_dollars)
+education$bachelors_degree_attainment_percent <- as.numeric(education$bachelors_degree_attainment_percent)
+
+#simplify dataframe by eliminating unnecessary columns
+education$high_school_attainment_percent <- NULL
+education$number_of_2_year_colleges <- NULL
+education$number_of_4_year_colleges_and_universities <- NULL
+education$x2_year_college_enrollment <- NULL
+education$x4_year_college_university_enrollment <- NULL
+
+#combine education dataframe with rural counties dataframe, get rid of extra county column
+education_rural <- bind_cols(education, rural_counties)
+  education_rural$county <- NULL
 ```
 
 ```{r}
-#find the average drug overdoses value per county and simplify dataframe 
-drug_overdoses <- drug_overdoses %>%
-  group_by(jurisdiction) %>%
-  summarise(drug_overdoses = mean(value, na.rm = TRUE)) %>%
-  ungroup()
+# Create boxplots for education values and rural classification
 
-#remove state data
-  drug_overdoses <- drug_overdoses[-21, ]
-```
-
-```{r}
-#join drug overdoses to rural
-  drug_overdoses_rural <- bind_cols(drug_overdoses, rural_counties)
-  drug_overdoses_rural$jurisdiction <- NULL
-```
-
-```{r}
-# Create boxplot for avg drug overdose rate and rural classification
-
-ggplot(drug_overdoses_rural, aes(x = value, y = drug_overdoses, fill = value)) +
+#for the annual number of public high school graduates
+ggplot(education_rural, aes(x = value, y = annual_number_of_public_high_school_graduates, fill = value)) +
   geom_boxplot() +
   labs(
-    title = "Average Drug Overdose Rate by Rural Classification",
+    title = "Public High School Graduates by Rural Classification",
     x = "Rural Classification",
-    y = "Average Drug Overdose Rate"
+    y = "Public High School Graduates"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+
+#for the public school student-teacher ratio
+ggplot(education_rural, aes(x = value, y = public_school_student_teacher_ratio, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Public Student-Teacher Ratio by Rural Classification",
+    x = "Rural Classification",
+    y = "Public Student-Teacher Ratio"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+
+#for the public schoo per-pupil expenditures
+ggplot(education_rural, aes(x = value, y = public_school_expenditures_per_pupil_dollars, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Public Expenditures Per Pupil by Rural Classification",
+    x = "Rural Classification",
+    y = "Public Expenditures Per Pupil"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+
+#for the percentage of students who attain a bachelors degree
+ggplot(education_rural, aes(x = value, y = bachelors_degree_attainment_percent, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Bachelors Degree Attained (%) by Rural Classification",
+    x = "Rural Classification",
+    y = "Bachelors Degree Attained (%)"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+```
+Oh my God the pattern is gone!! If anything it's actually the opposite.
+
+```{r}
+#linear regression model for annual number of public high school graduates and rural classification
+model <- lm(`value` ~ `annual_number_of_public_high_school_graduates`, data = education_rural)
+
+summary(model)
+```
+Very small coefficient, high p-value and low r-squared all go to show that there is no significant relationship between public high school graduates and rural classification.
+
+```{r}
+#linear regression model for public school student-teacher ratios and rural classification
+model <- lm(`value` ~ `public_school_student_teacher_ratio`, data = education_rural)
+
+summary(model)
+```
+Definitely more of a relationship than I've been seeing so far, actually a slightly positive correlation. However, the R-squared is still pretty small and the p-value doesn't make the 0.05 cut so it doesn't pass the significance test.
+
+```{r}
+#linear regression model for public school expenditures per pupil and rural classification
+model <- lm(`value` ~ `public_school_expenditures_per_pupil_dollars`, data = education_rural)
+
+summary(model)
+```
+Back to normal: Very small coefficient, high p-value and low r-squared all go to show that there is no significant relationship between public school expenditures per pupil and rural classification.
+
+```{r}
+#linear regression model for bachelors degree attainment and rural classification
+model <- lm(`value` ~ `bachelors_degree_attainment_percent`, data = education_rural)
+
+summary(model)
+```
+Coefficient officially isn't microscopic anymore but it's not significant, especially with an r-squared that small and a p-value that isn't below 0.05.
+
+Regrouping before I do more coding...
+
+So far none of the factors--child maltreatment, crime, diabetes, domestic violence, and education-- have had any significant correlation between rural or urban areas. If anything the story is in the spike that we've seen in counties with a 4 on the RUC scale, which I would probably define as suburbs. The story could also focus on how people probably think that rural areas are hot spots for poor education, low income (we'll see), diabetes, etc. and it's just not true in Maryland.
+
+
+
+THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND MEDIAN HOUSEHOLD INCOME
+
+```{r}
+#simplify dataframe by eliminating unnecessary categories
+median_household_income$date_created <- NULL
+median_household_income$reporting_period_start_date <- NULL
+median_household_income$reporting_period_end_date <- NULL
+median_household_income$margin_of_error <- NULL
+```
+
+```{r}
+#find the average median household income per county and create a simplified dataframe with the means. group them by jurisdiction so there is one value per county.
+
+median_household_income <- median_household_income %>%
+  group_by(geography) %>%
+  summarise(median_household_income = mean(median_household_income, na.rm = TRUE)) %>%
+  ungroup()
+
+#remove state data so we can focus on the counties
+  median_household_income <- median_household_income[-16, ]
+```
+
+```{r}
+# combine median household income dataframe with rural counties dataframe; remove geography column so as not to be redundant with county columns
+mhi_rural <- bind_cols(median_household_income, rural_counties)
+mhi_rural$geography <- NULL
+```
+
+```{r}
+# Create boxplot for median household income and rural classification
+ggplot(mhi_rural, aes(x = value, y = median_household_income, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Median Household Income by Rural Classification",
+    x = "Rural Classification",
+    y = "Median Household Income"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+```
+Still a spike in the rurals but with 6, definitely higher household income in more rural areas based on this boxplot. Let's look at the linear regression to see if there is actually some significance to this. Almost hoping there isn't for the consistency of the story.
+
+```{r}
+#linear regression model for median household income and rural classification
+model <- lm(`value` ~ `median_household_income`, data = mhi_rural)
+
+summary(model)
+```
+Nope (yay!). The p-value is inching closer to the 0.05 mark but still not close enough. The r-squared is still way too small and so is the coefficient for median household income, so there is, yet again, no significance.
+
+
+
+THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND REVENUE SOURCES
+
+```{r}
+#simplify dataframe by eliminating unnecessary categories
+revenue_sources$income_taxes_revenue_per_capita <- NULL
+revenue_sources$other_taxes_revenue_per_capita <- NULL
+revenue_sources$other_revenue_per_capita <- NULL
+revenue_sources$service_charges_revenue_per_capita <- NULL
+revenue_sources$debt_proceeds_revenue_per_capita <- NULL
+revenue_sources$total_revenue_per_capita <- NULL
+revenue_sources$property_taxes_revenue_per_capita <- NULL
+
+#remove state data to focus on counties
+revenue_sources <- revenue_sources[-25, ]
+```
+
+```{r}
+#combine revenue sources dataframe with rural counties dataframe
+revenue_rural <- bind_cols(revenue_sources, rural_counties)
+revenue_rural$county <- NULL
+```
+
+```{r}
+#Create boxplots for revenue sources and rural classification
+
+#for federal grants revenue and rural classification
+ggplot(revenue_rural, aes(x = value, y = federal_grants_revenue_per_capita, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Federal Grants Revenue Per Capita by Rural Classification",
+    x = "Rural Classification",
+    y = "Federal Grants Revenue Per Capita"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+
+#for state grants revenue and rural classification
+ggplot(revenue_rural, aes(x = value, y = state_grants_revenue_per_capita, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Federal Grants Revenue Per Capita by Rural Classification",
+    x = "Rural Classification",
+    y = "Federal Grants Revenue Per Capita"
   ) +
   theme_minimal() +
   scale_fill_brewer(palette = "Set3")
 ```
 
+Oh and guess what--the pattern is back.
+
 ```{r}
-#linear regression model for average property crime rate and rural classification
-model <- lm(`value` ~ `diabetes_er_visits`, data = diabetes_rural)
+#linear regression model for federal grants revenue and rural classification
+model <- lm(`value` ~ `federal_grants_revenue_per_capita`, data = revenue_rural)
 
 summary(model)
 ```
-Very small coefficient, high p-value and low r-squared all go to show that there is no significant relationship between domestic violence and rural classification.
+
+Sooo lame, but on par with everything else so that's ok. Doesn't reach the 0.05 p-value threshold, insignificant coefficient and r-squared. No significant relationship between federal grants revenue per capita and how rural a place is. I actually really wanted there to be a relationship between these two.
+
+```{r}
+#linear regression model for state grants revenue and rural classification
+model <- lm(`value` ~ `state_grants_revenue_per_capita`, data = revenue_rural)
+
+summary(model)
+```
+
+Guess what, it's not significant again. Doesn't reach the 0.05 p-value threshold, insignificant coefficient and r-squared. No significant relationship between state grants revenue per capita and how rural a place is. Still note the fact that the sin-style pattern and suburban spike is back. ONE MORE FACTOR!
+
+
+
+THIS SECTION FOCUSES ON THE RELATIONSHIP BETWEEN RURAL COUNTIES (SIMPLIFIED TO THEIR RESPECTIVE RUC VALUES) AND TEEN BIRTH RATE
+
+*It would be so ironic if this is the one factor that is significant*
+
+```{r}
+#filter teen birth rate so it only includes aggregate data encompassing all races
+teen_birth_rate <- filter(teen_birth_rate, race_ethnicity == "All races/ ethnicities (aggregated)")
+```
+
+```{r}
+#find the average teen birth rate per county and create a simplified dataframe with the means. group them by jurisdiction so there is one value per county.
+
+teen_birth_rate <- teen_birth_rate %>%
+  group_by(jurisdiction) %>%
+  summarise(teen_birth_rate = mean(value, na.rm = TRUE)) %>%
+  ungroup()
+
+#remove state data bc we're just focusing on counties
+teen_birth_rate <- teen_birth_rate[-21, ]
+```
+
+```{r}
+#create joint chart with teen brith rate and rural counties dataframes; remove extra county column
+  teenbirths_rural <- bind_cols(teen_birth_rate, rural_counties)
+  teenbirths_rural$jurisdiction <- NULL
+```
+
+```{r}
+# Create boxplot for teen birth rate avg and rural classification
+ggplot(teenbirths_rural, aes(x = value, y = teen_birth_rate, fill = value)) +
+  geom_boxplot() +
+  labs(
+    title = "Teen Birth Rate by Rural Classification",
+    x = "Rural Classification",
+    y = "Teen Birth Rate"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+```
+Mini sin curve thing going on. Still a little spike. Probably no real correlation.
+
+```{r}
+#linear regression model for teen births and rural classification
+model <- lm(`value` ~ `teen_birth_rate`, data = teenbirths_rural)
+
+summary(model)
+```
+No significant relationship b/t teen birth rate and rural-ness. P-value doesn't meet 0.05 threshold and r-squared and birth rate coefficient are not big enough to mean anything.
+
+CONCLUSION AND PITCH
+
+We can conclude there is no significant relationship between rural classification and a variety of factors including child maltreatment, teen birth rate, and education. The p-values for every single one of these factors and their relationship with how rural an area is never crosses the threshold of 0.05 needed to label any of these factors as significant. The same goes for the factors' coefficients and their adjusted R-squared value which are never large enough to make a difference int he significance. 
+
+I would pitch that there are many sterotypes of rural populations, whether it's a high rate of teen pregnancy, poverty, and poor education. This extensive analysis of a number of factors goes to show that there is truly no significance behind those stereotypes. The more rural a population is does not predict or even correlate with lower rates of college education, higher rates of domestic violence, or lower crime rates per capita.
+
+One issue I could see with this is the suburban spike. However, that could also be a focus for another story. Oddly enough, most of the box plots showed a median spike when the rural-urban code was 4, meaning 20,000+ people adjacent to a metro area. I was also wondering if this may be skewing the data and pulling away from the true correlation with rural-ness and whichever factors I assessed, though I don't expect that to be true. Another small random thing I thought may skew the data is that Deep Creek Lake--one of the biggest vacation hot spots in the state--is in Garrett County, which is the most rural county in the state.
+
+I would also love to map out each of these factors on a categorical scale (think each county in different colors pertaining to their value) where you can switch between the different factors while still seeing the rural-ness on each layer. I would also interview people to see what stereotypes they do have about people who live in rural areas, or even more specifically, Marylanders who live in counties like Garrett, Caroline or Kent. 

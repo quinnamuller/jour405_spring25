@@ -96,6 +96,8 @@ drug_overdoses <- read_csv("drug_overdoses.csv")
 #this data covers the drug-induced death rate from 2009 to 2021. It gives the state's baseline which I will definitely reference to see which counties are above or below average. I would also want to filter the data so all of the results are only "All races/ ethnicities (aggregated)." With that, I would probably really only look at the county and it's respective value.
 
 #I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
+
+#removing this dataset bc N/A datamarkers didn't paint the full picture of the data
 ```
 
 ```{r}
@@ -126,6 +128,8 @@ uninsured_er_visits <- read_csv("uninsured_er_visits.csv")
 #The data covers the rate of uninsured ER visits from 2008 to 2017. It gives the state's baseline which I will definitely reference to see which counties are above or below average. I would also want to filter the data so all of the results are only "All races/ethnicities (aggregated)." With that, I would probably really only look at the county and it's respective value. I would also make sure I'm averaging the values per jurisdiction over the years.
 
 #I'm likely going to perform a chi squared test with each of these factors and cross it with the RUC data, probably will make a scatterplot for each and highlight the rural counties
+
+#got rid of this factor
 ```
 
 ```{r}
